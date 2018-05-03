@@ -4,6 +4,7 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -290,6 +291,30 @@ public class MainActivity extends AppCompatActivity implements MapController.Sce
         Log.d(TAG, "Picked marker: " + markerPickResult.getMarker().getMarkerId());
         final String message = String.valueOf(markerPickResult.getMarker().getMarkerId());
         Toast.makeText(getApplicationContext(), "Selected Marker: " + message, Toast.LENGTH_SHORT).show();
+    }
+
+
+    int destination = 0;
+
+    public void flyTo(View v) {
+        switch (destination) {
+            case 0:
+                map.flyTo(8.82, 53.08, 16, 0, 0.5f);
+                destination = 1;
+                break;
+            case 1:
+                map.flyTo(-74.0, 40.705, 16, 0, 0.5f);
+                destination = 2;
+                break;
+            case 2:
+                map.flyTo(-122.41, 37.7749, 16, 0, 0.5f);
+                destination = 3;
+                break;
+            case 3:
+                map.flyTo(0.0, 0.0, 2, 0, 0.5f);
+                destination = 0;
+                break;
+        }
     }
 }
 

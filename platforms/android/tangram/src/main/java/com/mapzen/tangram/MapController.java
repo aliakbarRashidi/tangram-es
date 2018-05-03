@@ -594,6 +594,18 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Run flight animation to change postion and zoom  of the map
+     * @param tilt Tilt angle in radians; 0 corresponds to straight down
+     * @param duration Time in milliseconds to ease to the given tilt
+     * @param ease Type of easing to use
+     */
+    public void flyTo(final double lon, final double lat, final float zoom, final float duration, final float speed) {
+        checkPointer(mapPointer);
+        final float seconds = duration / 1000.f;
+        nativeFlyTo(mapPointer, lon, lat, zoom, duration, speed);
+    }
+
+    /**
      * Set the camera type for the map view
      * @param type A {@code CameraType}
      */
@@ -1221,6 +1233,7 @@ public class MapController implements Renderer {
     private synchronized native void nativeSetTilt(long mapPtr, float radians);
     private synchronized native void nativeSetTiltEased(long mapPtr, float radians, float seconds, int ease);
     private synchronized native float nativeGetTilt(long mapPtr);
+    private synchronized native void nativeFlyTo(long mapPtr, double lon, double lat, float zoom, float duration, float speed);
     private synchronized native boolean nativeScreenPositionToLngLat(long mapPtr, double[] coordinates);
     private synchronized native boolean nativeLngLatToScreenPosition(long mapPtr, double[] coordinates);
     private synchronized native void nativeSetPixelScale(long mapPtr, float scale);
