@@ -595,14 +595,16 @@ public class MapController implements Renderer {
 
     /**
      * Run flight animation to change postion and zoom  of the map
-     * @param tilt Tilt angle in radians; 0 corresponds to straight down
-     * @param duration Time in milliseconds to ease to the given tilt
-     * @param ease Type of easing to use
+     * @param position LngLat of the position to set
+     * @param zoom Zoom level; lower values show more area
+     * @param duration Time in milliseconds to ease to given zoom
+     * @param speed If duration is 0, speed is used as factor to change the duration that is
+     *              calculated for the duration of the flight path. (Recommended range 0.1 - 2.0)
      */
-    public void flyTo(final double lon, final double lat, final float zoom, final float duration, final float speed) {
+    public void flyTo(@NonNull final LngLat position, final float zoom, final float duration, final float speed) {
         checkPointer(mapPointer);
         final float seconds = duration / 1000.f;
-        nativeFlyTo(mapPointer, lon, lat, zoom, duration, speed);
+        nativeFlyTo(mapPointer, position.longitude, position.latitude, zoom, seconds, speed);
     }
 
     /**
