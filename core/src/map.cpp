@@ -600,9 +600,17 @@ void Map::setPosition(double _lon, double _lat) {
 
 void Map::setPositionEased(double _lon, double _lat, float _duration, EaseType _e) {
 
-    double lon_start, lat_start;
-    getPosition(lon_start, lat_start);
-    auto cb = [=](float t) { impl->setPositionNow(ease(lon_start, _lon, t, _e), ease(lat_start, _lat, t, _e)); };
+    double lonStart, latStart;
+    getPosition(lonStart, latStart);
+
+    double dLongitude = _lon - lonStart;
+    if (dLongitude > 180.0) {
+        _lon -= 360.0;
+    } else if (dLongitude < -180.0) {
+        _lon += 360.0;
+    }
+
+    auto cb = [=](float t) { impl->setPositionNow(ease(lonStart, _lon, t, _e), ease(latStart, _lat, t, _e)); };
     impl->setEase(EaseField::position, { _duration, cb });
 
 }
@@ -644,6 +652,13 @@ void Map::flyTo(double _lon, double _lat, float _z, float _duration, float _spee
     double lonStart = 0., latStart = 0.;
     getPosition(lonStart, latStart);
     float zStart = getZoom();
+
+    double dLongitude = _lon - lonStart;
+    if (dLongitude > 180.0) {
+        _lon -= 360.0;
+    } else if (dLongitude < -180.0) {
+        _lon += 360.0;
+    }
 
     const MapProjection& projection = impl->view.getMapProjection();
     glm::dvec2 a = projection.LonLatToMeters(glm::dvec2(lonStart, latStart));
