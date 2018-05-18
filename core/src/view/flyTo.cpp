@@ -20,9 +20,8 @@ float getMinimumEnclosingZoom(double aLng, double aLat, double bLng, double bLat
 
 std::function<glm::dvec3(float)> getFlyToFunction(const View& view, glm::dvec3 start, glm::dvec3 end, double& _duration) {
 
-    auto cosh = [](double x) { return (std::pow(M_E, x) + std::pow(M_E, -x)) / 2.0; };
-    auto sinh = [](double x) { return (std::pow(M_E, x) - std::pow(M_E, -x)) / 2.0; };
-    auto tanh = [=](double x) { return sinh(x) / cosh(x); };
+    // User preference for zoom/move curve sqrt(2)
+    const double rho = 1.414;
 
     const double scale = std::pow(2.0, end.z - start.z);
 
@@ -31,19 +30,11 @@ std::function<glm::dvec3(float)> getFlyToFunction(const View& view, glm::dvec3 s
     auto width = std::abs(rect[0][0] - rect[1][0]);
     auto height = std::abs(rect[0][1] - rect[1][1]);
 
-    LOG("SCALE: %f (%f - %f), dim %fx%f", scale, start.z, end.z, width, height);
-    LOG("A %f %f", start.x, start.y);
-    LOG("B %f %f", end.x, end.y);
-
     const double w0 = std::max(width, height);
     const double w1 = w0 / scale;
 
-
     const glm::dvec2 c0{start.x, start.y};
     const glm::dvec2 c1{end.x, end.y};
-
-    // User preference for zoom/move curve sqrt(2)
-    const double rho = 1.414;
 
     const double u1 = glm::distance(c0, c1);
 
@@ -62,37 +53,32 @@ std::function<glm::dvec3(float)> getFlyToFunction(const View& view, glm::dvec3 s
     const double S = (r1 - r0) / rho;
     _duration = S;
 
-    LOG("DISTANCE %f / r0:%f / r1:%f / b0:%f / b1:%f", u1, r0, r1, b(0), b(1));
-
     auto u = [=](double s) {
                  double a = w0 / std::pow(rho, 2);
-                 double b = a * cosh(r0) * tanh(rho * s + r0);
-                 double c = a * sinh(r0);
+                 double b = a * std::cosh(r0) * std::tanh(rho * s + r0);
+                 double c = a * std::sinh(r0);
                  return b - c;
              };
 
-    auto w = [=](double s) { return cosh(r0) / cosh(rho * s + r0); };
+    auto w = [=](double s) { return std::cosh(r0) / std::cosh(rho * s + r0); };
 
     // Check if movement is large enough to derive the fly-to curve
     bool move = u1 > std::numeric_limits<double>::epsilon();
 
-    auto fn = [=](float t) {
+    return [=](float t) {
 
                  if (t >= 1.0) {
                      return end;
-
                  } else if (move) {
                      double s = S * t;
                      glm::dvec2 pos = glm::mix(c0, c1, u(s) / u1);
-                     double zoom = start.z + (std::log(1.0 / w(s)) / std::log(2.0));
+                     double zoom = start.z - std::log2(w(s));
 
                      return glm::dvec3(pos.x, pos.y, zoom);
-
                  } else {
                      return glm::mix(start, end, t);
                  }
-    };
-    return fn;
+           };
 }
 
 } // namespace Tangram
