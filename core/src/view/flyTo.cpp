@@ -51,7 +51,8 @@ std::function<glm::dvec3(float)> getFlyToFunction(const View& view, glm::dvec3 s
     const double r0 = r(b(0));
     const double r1 = r(b(1));
     const double S = (r1 - r0) / rho;
-    _duration = S;
+
+    _duration = std::isnan(S) ? std::abs(start.z - end.z) : S;
 
     auto u = [=](double s) {
                  double a = w0 / std::pow(rho, 2);
